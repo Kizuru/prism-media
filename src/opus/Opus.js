@@ -133,11 +133,12 @@ class Encoder extends OpusStream {
   async _transform(chunk, encoding, done) {
     this._buffer = Buffer.concat([this._buffer, chunk]);
     let n = 0;
-    while (this._buffer.length >= this._required * (n + 1)) {
+    while (this._buffer && this._buffer.length >= this._required * (n + 1)) {
       const buf = await this._encode(this._buffer.slice(n * this._required, (n + 1) * this._required));
       this.push(buf);
       n++;
     }
+    if (!this._buffer) return this._destroy(null, () => null);
     if (n > 0) this._buffer = this._buffer.slice(n * this._required);
     return done();
   }
